@@ -1,0 +1,22 @@
+gada/
+├── app/
+│   ├── __init__.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   └── transaction.py
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── style.css
+│   │   └── js/
+│   │       └── main.js
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   └── dashboard.html
+│   ├── routes.py
+│   └── mining.py
+├── config.py
+├── requirements.txt
+└── run.py 

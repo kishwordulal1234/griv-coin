@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="dashboard" class="dashboard-container">
+    <!-- Profile Section -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ current_user.username[0].upper() }}
+            </div>
+            <div class="profile-info">
+                <h2>{{ current_user.username }}</h2>
+                <p class="user-id">ID: {{ current_user.id }}</p>
+                <div class="id-actions">
+                    <button onclick="copyUserId()" class="btn-secondary">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button onclick="showQRCode()" class="btn-secondary">
+                        <i class="fas fa-qrcode"></i> QR
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mining-controls">
+            <div class="mining-power">
+                <label for="mining-power">Mining Power</label>
+                <select id="mining-power" onchange="updateMiningPower()">
+                    <option value="low">Low (25%)</option>
+                    <option value="medium" selected>Medium (50%)</option>
+                    <option value="high">High (75%)</option>
+                    <option value="max">Maximum (100%)</option>
+                </select>
+            </div>
+            <button id="mining-toggle" class="btn-primary" onclick="toggleMining()">
+                <i class="fas fa-play"></i> Start Mining
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Balance</h3>
+                <p id="balance">{{ user.balance|round(2) }} GRIV</p>
+                <div class="balance-limit">
+                    <div class="progress-bar" style="width: {{ (user.balance / 1619 * 100)|round(2) }}%"></div>
+                    <span class="limit-text">{{ (user.balance / 1619 * 100)|round(2) }}% of max</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Mining Rate</h3>
+                <p id="mining-rate">{{ mining_rate|round(2) }} GRIV/min</p>
+            </div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='{{ url_for('main.active_users') }}'" style="cursor: pointer;">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Active Users</h3>
+                <p id="active-users">{{ active_users }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-microchip"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Mining Power</h3>
+                <p id="current-power">50%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Section -->
+    <div class="transfer-section">
+        <div class="transfer-card">
+            <h3><i class="fas fa-exchange-alt"></i> Transfer Coins</h3>
+            <form id="transfer-form" class="transfer-form">
+                <div class="form-group">
+                    <label for="receiver_id">Receiver ID</label>
+                    <input type="text" 
+                           id="receiver_id" 
+                           name="receiver_id" 
+                           placeholder="Enter receiver's ID"
+                           pattern="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+                           title="Please enter a valid user ID"
+                           required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (GRIV)</label>
+                    <input type="number" 
+                           id="amount" 
+                           name="amount" 
+                           step="0.01" 
+                           min="0.01" 
+                           placeholder="Enter amount"
+                           required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="transactions-section">
+        <div class="transactions-card">
+            <h3><i class="fas fa-history"></i> Recent Transactions</h3>
+            <div id="transactions-list">
+                {% for tx in transactions %}
+                <div class="transaction-item">
+                    <div class="transaction-icon">
+                        {% if tx.sender_id == current_user.id %}
+                        <i class="fas fa-arrow-up sent"></i>
+                        {% else %}
+                        <i class="fas fa-arrow-down received"></i>
+                        {% endif %}
+                    </div>
+                    <div class="transaction-details">
+                        <p class="transaction-main">
+                            {% if tx.sender_id == current_user.id %}
+                            Sent to {{ tx.receiver.username }}
+                            {% else %}
+                            Received from {{ tx.sender.username }}
+                            {% endif %}
+                        </p>
+                        <p class="transaction-amount">
+                            {{ tx.amount }} GRIV
+                        </p>
+                    </div>
+                    <div class="transaction-time">
+                        {{ tx.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Your User ID QR Code</h2>
+            <div id="qrcode"></div>
+            <p>Scan this code to get your User ID</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome and QR Code library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+{% endblock %} 
