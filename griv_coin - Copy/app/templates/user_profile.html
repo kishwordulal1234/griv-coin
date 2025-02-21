@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header-card">
+        <div class="profile-avatar large">
+            {{ profile_user.username[0].upper() }}
+        </div>
+        <div class="profile-details">
+            <h2>{{ profile_user.username }}</h2>
+            <p class="user-id">ID: {{ profile_user.id }}</p>
+            <div class="user-stats">
+                <div class="stat">
+                    <span class="label">Balance</span>
+                    <span class="value">{{ profile_user.balance|round(2) }} GRIV</span>
+                    <span class="npr-value">(≈ NPR {{ (profile_user.balance * 5.6)|round(2) }})</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Mining Power</span>
+                    <span class="value">{{ (profile_user.mining_power * 100)|round }}%</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Status</span>
+                    <span class="value">{{ 'Active' if profile_user.is_active else 'Inactive' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Price Chart -->
+    <div class="chart-card">
+        <h3>GRIV/NPR Exchange Rate</h3>
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="transactions-card">
+        <h3>Recent Transactions</h3>
+        <div class="transactions-list">
+            {% for tx in transactions %}
+            <div class="transaction-item">
+                <div class="transaction-icon">
+                    {% if tx.sender_id == profile_user.id %}
+                    <i class="fas fa-arrow-up sent"></i>
+                    {% else %}
+                    <i class="fas fa-arrow-down received"></i>
+                    {% endif %}
+                </div>
+                <div class="transaction-details">
+                    <p class="transaction-main">
+                        {% if tx.sender_id == profile_user.id %}
+                        Sent to {{ tx.receiver.username }}
+                        {% else %}
+                        Received from {{ tx.sender.username }}
+                        {% endif %}
+                    </p>
+                    <p class="transaction-amount">
+                        {{ tx.amount }} GRIV
+                        <span class="npr-value">(≈ NPR {{ (tx.amount * 5.6)|round(2) }})</span>
+                    </p>
+                </div>
+                <div class="transaction-time">
+                    {{ tx.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sample price data (you can replace this with real data)
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i+1}`),
+            datasets: [{
+                label: 'GRIV/NPR Rate',
+                data: Array.from({length: 30}, () => 5.6 + (Math.random() * 0.4 - 0.2)),
+                borderColor: '#2196F3',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: '30 Day Price History'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: function(value) {
+                            return 'NPR ' + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-card">
+        <div class="receiver-info">
+            <div class="user-avatar large">
+                {{ receiver.username[0].upper() }}
+            </div>
+            <h2>Pay to {{ receiver.username }}</h2>
+            <p class="user-id">ID: {{ receiver.id }}</p>
+        </div>
+        
+        <form id="qr-payment-form" class="payment-form">
+            <div class="form-group">
+                <label for="amount">Amount (GRIV)</label>
+                <input type="number" 
+                       id="amount" 
+                       name="amount" 
+                       step="0.01" 
+                       min="0.01" 
+                       placeholder="Enter amount"
+                       required>
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Payment
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('qr-payment-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('amount').value;
+    
+    try {
+        const response = await fetch('/transfer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `receiver_id={{ receiver.id }}&amount=${amount}`
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 2000);
+        } else {
+            showNotification(data.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Payment failed. Please try again.', 'error');
+    }
+});
+</script>
+{% endblock %} 
