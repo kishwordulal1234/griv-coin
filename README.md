@@ -1,4 +1,5 @@
 # 🚀 Griv Coin
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC%20ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 ## 🌟 Overview
 Griv Coin is a fun and interactive digital currency designed for a controlled ecosystem. It allows users to **mine**, **trade**, and **send coins** seamlessly. The mining rate dynamically adjusts based on the number of active users, making the system fair and engaging.
